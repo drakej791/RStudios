@@ -1,0 +1,90 @@
+---
+title: "Lab 1"
+author: "Drake Johnson"
+date: "10/31/23"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+Submissions should be make in blackboard and consist of exactly 2 files: the R Markdown (rmd) file and the PDF file.
+
+## Problem 1: Inputting data
+
+Find a small dataset with two variables and input columns of values for both variables. (5 Points)
+```{r}
+time<-c(4,5,5,6,4,7,4,5,5,4)
+speed<-c(10,9,9,8,7,11,10,12,9,10)
+```
+
+## Problem 2: Calculating statistics
+Calculate the mean, standard deviation and Pearson correlation coefficient for your dataset. (10 Points)
+
+```{r}
+mean(time)
+mean(speed)
+sd(time)
+sd(speed)
+cor(time,speed)
+```
+
+## Problem 3: Plot a scatterplot
+Create a scatterplot of your dataset. (5 Points)
+
+```{r}
+plot(time,speed)
+```
+
+## Problem 4: Read in a csv and get a data summary
+Find a dataset(.csv), read it and get a summary of the dataset. (10 Points)
+
+```{r}
+data<-read.csv("HollywoodsMostProfitableStories.csv")
+summary(data)
+```
+
+Use the dataset from Problem 4 to asnwer the next problems.
+
+## Problem 5: Create a histogram 
+
+Select a continuous variable in your dataset and create a histogram for that variable. Add chart title, labels, and color. (10 Points)
+
+```{r}
+hist(data$Profitability,main = "Histogram of profitability",xlab = "profitability",col = "red",border="green")
+```
+## Problem 6: Create a Bar chart 
+
+Select a discrete variable in your dataset and create a Bar chart for that variable. Add chart title, labels, and color.  (10 Points)
+
+```{r}
+barplot(table(data$Year),main = "bar chart of years",ylab = "movies",col = topo.colors(8))
+```
+
+## Problem 7: Create a scatterplot 
+
+Select a two continuous variables in your dataset and create a scatterplot for these variables. Add chart title, labels, and color. (10 Points)
+
+```{r}
+plot(data$Audience..score..,data$Rotten.Tomatoes..,main = "audience score vs. rotten tomatoes",xlab = "audience score",ylab = "rotten tomatoes",col="green")
+```
+
+## Problem 8: Creating a Dot plot for two variables (Discrete X, Continuous Y) 
+
+Select a two variables (Discrete X, Continuous Y) in your dataset and create a a dot plot for these variables. Add chart title, labels, and color. (10 Points)
+
+```{r}
+dotchart(data$Worldwide.Gross,main="Dot plot of worldwide gross",color = heat.colors(8))
+```
+
+## Problem 9: Creating a Box plot for two variables (Discrete X, Continuous Y) 
+
+Select a two variables (Discrete X, Continuous Y) in your dataset from problem 4 and create a a Box plot for these variables.Add chart title, labels, and color. (10 Points)
+```{r}
+boxplot(Profitability~Year, data = data, color=topo.colors(4))
+```
+8
+
+
+
+

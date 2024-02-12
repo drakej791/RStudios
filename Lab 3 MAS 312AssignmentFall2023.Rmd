@@ -1,0 +1,192 @@
+---
+title: "Lab 3"
+author: "Drake Johnson"
+date: "11/7/2023"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Submissions should be make in blackboard and consist of exactly 2 files: the R Markdown (rmd) file and the PDF file. 
+
+
+a. Near the very top of the document write your name in the appropriate place. 
+
+b. Near the very top of the document write the due date of this assignment in the appropriate place. 
+
+
+## Problem #1
+
+1.Netflix wanted to increase the number of hours that its subscribers watched its content by offering them a free trial of a premium plan. The premium plan was advertised to subscribers using different methods: pop-up, banner, or no advertisement. A random sample of subscribers  was selected, and their hours of watching Netflix after the trial period were recorded. Determine if there is a significant difference in the number of hours of watching Netflix based on the methods used to advertise the premium plan. Use the data contained in Excel file "Netflix". (30 points)
+
+a. Identify the factor
+
+*advertisement method*
+
+b. List the levels of the factor
+
+*pop-up, banner and no advertisement*
+
+c. Identify the response variable
+
+*hours of watching*
+
+d. Identify the experimental units 
+
+*subscribers*
+
+e. Construct a box plot to visualize any group differences and comment your observations.
+
+```{r}
+data<-read.csv("Netflix.csv")
+boxplot(Number.of.Hours~Method,data=data,main="Netflix",xlab="Method",ylab="hours watched",col=topo.colors(3))
+```
+*Your comments here*
+
+f. Conduct analysis of variance test and examine the ANOVA plots to see if the data meets the assumptions of ANOVA. Additionally, conduct the respective tests to check the assumptions. 
+
+```{r}
+aov.prob1<-aov(Number.of.Hours~as.factor(Method),data = data)
+summary(aov.prob1)
+plot(aov.prob1)
+tukey.test<-TukeyHSD(aov.prob1)
+tukey.test
+plot(tukey.test)
+```
+
+*Given the Q-Q residuals plot, since the data points follow the line, we can assume the data follows a normal distribution. Given the 95% family wise confidence level plot, we can assume all the population variances are not equal because they do not all overlap.*
+
+g. Use a 0.05 level of significance to determine whether there is a significant difference in the hours of watching Netflix across the different methods.
+
+*Since the p-value of 0.000107 is less than alpha=0.05, we reject H0.There is enough evidence to conclude that not all of the population means of watchin times are equal between advertisement methods.*
+
+h. If warranted, perform a multiple comparison test (Tukey's HSD) to determine which pairs are different using a level of significance of 5%
+
+```{r}
+tukey.test1<-TukeyHSD(aov.prob1)
+tukey.test1
+```
+
+*Your conclusion here*
+
+
+## Problem #2
+Suppose a bakery would like to test the quality of four new cake recipes that it has created. Each recipe is baked in identical size pans, and after cooling down the cakes are cut into equal slices. The height (in inches) of the cake slices are used to measure the quality of the recipe. To control for variations in oven and ingredient conditions, each recipe was baked in five different batches. Each batch was assigned randomly to the cake recipes. The data is included in the Excel file "Bakery".
+(20 points)
+
+a. Identify the factor
+
+*recipe*
+
+b. List the levels of the factor
+
+*recipe 1, recipe 2, recipe 3, recipe 4*
+
+c. Identify the experimental units 
+
+*cakes*
+
+d. Identify the response variable
+
+*height of the cake*
+
+e. Construct a box plot to visualize any group differences and comment your observations.
+
+```{r}
+data2<-read.csv("Bakery.csv")
+boxplot(Height~Recipe,data=data2,main="Recipes",xlab="Recipe",ylab="Height",col=topo.colors(3))
+```
+
+*Your comments here*
+
+f. Construct an interaction plot. Is there evidence of interaction between the cake recipes and the batches?
+
+```{r}
+Recipe=factor(data2$Recipe)
+Batch=factor(data2$Batch)
+Height=data2$Height
+interaction.plot(Recipe,Batch,Height)
+```
+
+*According to the interaction plot, there is no evidence that the cake recipe and batches interacted.*
+
+g. Conduct analysis of variance test and examine the ANOVA plots to see if the data meets the assumptions of ANOVA. Additionally, conduct the respective tests to check the assumptions. 
+
+```{r}
+aov.prob2<-aov(Height~Recipe+Batch)
+summary(aov.prob2)
+plot(aov.prob2)
+```
+
+*According to the Q-Q residuals plot, the data does not follow a normal distribution because the data points do not closely follow the line. *
+
+h. Use a 0.05 level of significance to determine whether there is a significant difference in the height (in inches) of the cake slices among the cake recipes. 
+
+*Since the p-value of 1.79e-0.7 is smaller than alpha=0.05, we reject H0. There is enough evidence to conclude that there is a significant difference in the height of cakes among the recipes.*
+
+
+
+## Problem #3
+
+A New York Times article, “The Impact of a Friendly Smile”, cited a Harvard University study that researched the influence of people’s mood on their productivity. Participants were placed in one of three groups. After starting a new project, people in the first group received an email every week from a cheerful colleague to ask about their progress and compliment their work. A second group received the same email from a neutral colleague. The third group did not receive an email. The number of tasks completed per week was recorded at the beginning of the project, after three months, and after six months. The researchers wanted to determine if the tone of the email and the duration of the project (the length of time since it began) have an effect on the number of tasks the groups completed per week. Use the  data contained in the Excel file "PeopleMood". (30 points)
+ a. Identify the factors
+
+*tone of email and duration of the project*
+
+b. List the levels of the factors
+
+*email - positive email, neutral email and no email*
+*duration - beginning, three months, six months*
+
+c. Identify the response variable
+
+*number of tasks completed per week*
+
+d. Identify the experimental units
+
+*work groups*
+
+e. Construct a box plot to visualize any group differences and comment your observations.
+
+```{r}
+data3<-read.csv("PeopleMood.csv")
+boxplot(Tasks~Group,data=data3,main="Tasks x Groups",xlab="Group",ylab="tasks comleted",col=heat.colors(3))
+boxplot(Tasks~Time,data=data3,main="Tasks x Duration",xlab="Time elapsed",ylab="tasks comleted",col=heat.colors(3))
+```
+
+*All the intervals interlap and there is no outliars as far as the groups go. For the duration levels, not all the levels overlap.*
+
+f. Construct an interaction plot. Is there evidence of interaction between the tone of the email and Length of time since the program began?
+
+```{r}
+interaction.plot(data3$Group,data3$Time,data3$Tasks)
+```
+
+*There is no interaction between any of the groups*
+
+g. Conduct analysis of variance test and examine the ANOVA plots to see if the data meets the assumptions of ANOVA. Additionally, conduct the respective tests to check the assumptions.
+
+```{r}
+aov.ex3<-aov(Tasks~Time*Group,data=data3)
+summary(aov.ex3)
+plot(aov.ex3)
+```
+
+*According to the residual plot, the data sets follow a normal distribution, *
+
+h. Use a 0.05 level of significance to determine
+
++is there a interaction between the tone of the email and Length of time since the program began? 
+
++ is there an effect due to the tone of the email?
+
++ is there an effect due to Length of time since the program began?
+
+
+*Since the p-values of 2e-16 and 4.46e-08 are both less than alpha=0.05, we reject H0. There is enough evidence to conclude that both the tone of the email and length of time since the program begin both individually affect the number of tasks completed. However, since the p-value of 0.694 is greater than alpha=0.05, we fail to reject H0. There is no evidence of an interaction between tone of the email and length of time since the program began. *
+

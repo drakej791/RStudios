@@ -1,0 +1,148 @@
+---
+title: "Lab 4"
+author: "Drake Johnson"
+date: "12/13/23"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+##Problem: 
+
+In a bustling retail store specializing in electronics, the management is keen on understanding and improving customer satisfaction to enhance overall business performance. The dataset encompasses information gathered from customer interactions over a period, covering various aspects of their experience within the store. The goal is to estimate customer satisfaction (Satisfaction) and implement targeted strategies to elevate the shopping experience. The regression analysis includes the following variables: 
+
+Age: The age of the customer.
+Income: The annual income of the customer.
+Education Level: The highest level of education attained by the customer (0 for college, 1 for Bachelor, 2 for Master, 3 for PhD).
+Years of Experience: The number of years the customer has been shopping at the store.
+Distance to Workplace: The distance of the customer's workplace from the store.
+Gender: The gender of the customer (0 for Female, 1 for Male).
+Marital Status: The customer's marital status (0 for Single, 1 for Married).
+Employment Status: The employment status of the customer (0 for Part-time, 1 for Full-time).
+Health Status: The perceived health status of the customer (1 for Fair, 2 for Good, 3 for Excellent).
+Satisfaction: A numerical score reflecting the customer's satisfaction with their overall shopping experience.
+
+
+Use the data contained in excel file "CustomerSatisfaction".
+
+
+1. Read the data and get a summary of the data using the summary function. 
+
+```{r}
+data1<-read.csv("CustomerSatisfaction.csv")
+summary(data1)
+```
+
+2.	Conduct a correlation analysis. Is there any concern about correlation between the independent variables (Multicollinearity)? If so, which variable(s) would you eliminate from the analysis? Why? 
+
+```{r}
+c=cor(data1)
+c
+```
+
+*Age may be highly correlated with income, education.coded and experience. I would eliminate education.coded first, since it's least correlated with the dependent variable. Then income, then age, then experience.*
+
+3. Generate a linear model to predict the dependent variable (`Satisfaction`) from all of the other variables except `variable(s) highly correlated`. 
+
+```{r}
+reg=lm(Satisfaction~.-Education.coded - Income - Age,data=data)
+summary(reg)
+```
+
+*y=51.5389+0.2382x1+0.6812x2+0.3776x3+2.3545x4+11.2285x5
+
+4. Compute the VIF, double check if there any concern about correlation between the independent variables (Multicollinearity)
+
+```{r}
+library(car)
+vif_values<-car::vif(reg)
+vif_values
+```
+
+5.	Use the F test and a 0.05 level of significance to determine whether there is a relationship between the variables 
+
+*Since the p-value of < 2.2e-16 is less than aplha =0.05, we reject H0. There is evidence of a significant relationship between the independent variables.*
+
+6. Use the t test and a 0.05 level of significance to determine the significance of each independent variable. Would you consider eliminating any variable from the model? Which variable(s)? Which one would you drop first?
+
+*Gender, marital status and employment are all insignificant. I would consider dropping, marital status first, then gender, then employment, in order of increasing absolute t-values.*
+
+7. Find the best regression equation by dropping one at a time insignificant variables in the model. What variables did you keep in your model? What is the interpretation of the coefficients of the recommended regression equation? Include all the outputs step by step. 
+
+```{r}
+reg2=lm(Satisfaction~.-Education.coded - Income - Age - Gender - Employment,data=data)
+summary(reg2)
+plot(reg2)
+```
+
+*y=61.3066+0.4074x1-0.5583x2-2.9012x3+10.2623*
+*I kept experience, distance employment, marital status and health.coded. For every 1 unit increase in experience, satisfaction increases by 0.4074. Fr every 1 unit increase in distance, satisfaction decreases by 0.5583. For every 1 unit increase in marital status, satisfaction decreases 2.9012. And for every 1 unit increase in marital status, satisfaction increases by 10.2623.*
+
+8. Use the R function step() to find the best model using backward approach, forward selection, and stepwise.Compare the results with the the best regression equation output from question 7. Which regression equation would you use? How much is the adjusted R2 for the selected model?
+
+```{r}
+reg1=lm(data=data)
+BE1=step(reg1,data=data,direction="backward")
+summary(BE1)
+```
+
+```{r}
+reg=lm(Satisfaction~.-Education.coded - Income - Age,data=data)
+BE=step(reg,data=data,direction="backward")
+summary(BE)
+```
+
+```{r}
+null1=lm(data=data)
+null1
+full1=lm(data=data)
+full1
+FWD1=step(null1,scope=list(upper=full1),data=data,direction="forward")
+summary(FWD1)
+```
+
+```{r}
+null=lm(Satisfaction~.-Education.coded - Income - Age,data=data)
+null
+full=lm(Satisfaction~.-Education.coded - Income - Age,data=data)
+full
+FWD=step(null,scope=list(upper=full),data=data,direction="forward")
+summary(FWD)
+```
+
+```{r}
+BOTH1=step(null1,scope=list(upper=full1),data=data,direction="both")
+summary(BOTH1)
+```
+
+```{r}
+BOTH=step(null,scope=list(upper=full),data=data1,direction="both")
+summary(BOTH)
+```
+
+*I didnt know whether to take out highly correlated variables when doing these approaches, so I did it both ways*
+*After eliminating highly correlated variables, the backwards and stepwise approaches,I got the same equation as I did from question 7. I would use the equation from question 7, which has the least independent variables, and the best r-squared value of 0.9533*
+
+
+9. Use the Best-subset regression to find the best predictors of "Satisfaction" considering the independent variables that are not highly correlated.  Based on the adjusted R2,what variables would you include in the regression equation?
+
+```{r}
+library(leaps)
+library(MASS)
+BSR=regsubsets(Satisfaction~.-Education.coded - Income - Age,data=data)
+plot(BSR,scale="adjr2")
+plot(BSR,scale="Cp")
+```
+
+* I would keep experience, distance, health.coded and marital status.*
+
+10. State the coefficients of the regression equation in the selected regression model.
+
+```{r}
+coef(BSR,4)
+```
+
+
+
+

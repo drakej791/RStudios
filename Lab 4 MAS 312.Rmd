@@ -1,0 +1,120 @@
+---
+title: "Lab 4"
+author: "Drake Johnson"
+date: "12/5/23"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+##Example: 
+
+The Professional Golfers Association (PGA) maintains data on performance and earnings for members of the PGA Tour. The top 125 players based on total earnings in PGA Tour events are exempt for the following season. Making the top 125 money list is important because a player who is "exempt" has qualified to be a full-time member of the PGA tour for the following season. Scoring average is generally considered the most important statistic in terms of success on the PGA Tour. A study is conducted to develop a regression equation to estimate the average score based on the following independent variables: driving distance, driving accuracy, greens in regulation, sand saves, and average putts per round have.Year-end performance data for the 125 players who had the highest total earnings in PGA for 2008 are contained in the file named PGATour2. Each row of the data set corresponds to a PGA Tour player, and the data haven been sorted upon total earnings. 
+
+
+1. Read in the data and get a summary of the data using the summary function. 
+
+```{r}
+data1<-read.csv("PGATour2.csv")
+summary(data1)
+```
+
+2.	Conduct a correlation analysis. Is there any concern about correlation between the independent variables (Multicollinearity)? If so, which variable would you eliminate from the analysis?
+```{r}
+c=cor(data1)
+c
+```
+
+*The greens in regulation and putts per round are highly correlated. I would delete the putts per round variable because it has a lower correlation to the dependent variable than greens in regulation.*
+
+
+3. Generate a linear model to predict the dependent variable (`Scoring Average`) from all of the other variables except `variable highly correlated`. 
+
+```{r}
+reg=lm(Scoring.Average~.-PPR,data=data1)
+summary(reg)
+```
+4. Based on VIF, is there any concern about correlation between the independent variables (Multicollinearity)?
+
+```{r}
+library(car)
+vif_values<-car::vif(reg)
+vif_values
+
+
+```
+
+*Theres no issues with high correlation between independent variable..*
+
+5. Use the F test and a 0.05 level of significance to determine whether there is a relationship between the variables 
+
+*Since the p-value of <2.2e-16 is less than 0.05, we reject H0. There is evidence of a relationship between the variables..*
+
+6. Use the t test and a 0.05 level of significance to determine the significance of each independent variable. Would you consider eliminating any variable from the model? Which variable?
+
+*We would drop driving accuracy because it has the highest p-value of the nonsignificant variables..*
+
+7. Generate a linear model to predict the dependent variable (`Scoring Average`) from all of the other variables except `insignificant variable`.
+
+```{r}
+reg2=lm(Scoring.Average~.-PPR-DrAccu,data=data1)
+summary(reg2)
+plot(reg2)
+```
+
+8. Use the t test and a 0.05 level of significance to determine the significance of each independent variable. Would you consider eliminating any variable from the model? Which variable?
+
+*No all the variables are signifcant..*
+
+9. A similar approach is to use the R function step() to find the best model. The mode of stepwise search can be Forward selection, Backward elimination and Stepwise regression (i.e. both). Let's use the backward approach and compare the result with the output of question 7.
+
+```{r}
+reg2=lm(Scoring.Average~.-PPR,data=data1)
+BE=step(reg2,data=data1,direction="backward")
+summary(BE)
+```
+
+We can perform forward selection on the same data set using the command:
+
+```{r}
+null=lm(Scoring.Average~1,data=data1)
+null
+full=lm(Scoring.Average~.-PPR,data=data1)
+full
+FWD=step(null,scope=list(upper=full),data=data1,direction="forward")
+summary(FWD)
+```
+
+and stepwise regression using the command:
+
+```{r}
+BOTH=step(null,scope=list(upper=full),data=data1,direction="both")
+summary(BOTH)
+```
+
+The function regsubsets() in the library `leaps` can be used for regression subset selection. Thereafter, one can view the ranked models according to different scoring criteria by plotting the results of regsubsets().
+
+Before using the function for the first time you will need to install the `leaps` package. One way to do this is to type `install.packages("leaps")` in the console window.
+
+10. Use the Best-subset regression to find the best predictors of scoring average considering the independent variables that are not highly correlated. What variables would you include in the regression equation?
+
+```{r}
+library(leaps)
+library(MASS)
+BSR=regsubsets(Scoring.Average~.-PPR,data=data1)
+plot(BSR,scale="adjr2")
+plot(BSR,scale="Cp")
+```
+
+*I would include DrDist, GIR, Sand.Saves and Scrambling because this equation ahs the best R value with the least amount of independent variables. *
+
+11. State the coefficients of the model in the selected model.
+
+```{r}
+coef(BSR,4)
+```
+
+
+
+

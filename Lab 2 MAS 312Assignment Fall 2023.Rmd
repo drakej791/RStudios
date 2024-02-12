@@ -1,0 +1,286 @@
+---
+title: "Lab 2"
+author: "Drake Johnson"
+date: "10/31/23"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+Submissions should be make in blackboard and consist of exactly 2 files: the R Markdown (rmd) file and the PDF file. 
+
+
+a. Near the very top of the document write your name in the appropriate place. 
+
+b. Near the very top of the document write the due date of this assignment in the appropriate place. 
+
+
+## Problem #1:
+
+A tech company conducted a survey to determine the average time its employees spend working remotely per week. They found that the distribution of hours spent working remotely per week followed a normal distribution with a population standard deviation of 9 hours. A sample of 30 employees revealed that the sample mean was 25 hours. Develop a 98% confidence interval for the population mean of the hours spent working remotely per week by the company's employees. (7 points)
+
+```{r}
+n<-30
+xbar=25
+sig=9
+z_value=abs(qnorm(0.01))
+moe<-z_value*sig/sqrt(n)
+left<-xbar-moe
+right<-xbar+moe
+left
+right
+```
+
+## Problem #2:
+
+A food processing company is concerned about the average weight of their packaged products. To assess this, they randomly selected five packages and recorded their weights (in grams) as follows: 320, 310, 325, 335, and 315 grams.Calculate the sample mean and standard deviation of the package weights (include the code for calculation), and determine a 95% confidence interval for the population mean weight of all packages produced by this company.(7 points)
+```{r}
+n<-5
+x<-c(320,310,325,335,315)
+mean<-mean(x)
+sd<-sd(x)
+xbar=mean
+sig=sd
+t_value=qt(0.95,n-1)
+moE<-t_value*sig/sqrt(n)
+left<-xbar-moE
+right<-xbar+moE 
+left
+right
+
+```
+
+## Problem #3:
+
+A retail company is interested in assessing the variability of the weekly sales performance of its stores located in a specific region. They randomly selected a sample of 40 stores from that region and calculated the sample standard deviation of their weekly sales, which was $7,200.Construct a 99% confidence interval estimate of the population variance and population standard deviation for the weekly sales performance of all stores in that region.(7 points) 
+
+```{r}
+n<-40
+variance<-7200*7200
+conf.level=0.99
+chilower=qchisq((1-conf.level)/2,n-1,lower.tail = FALSE)
+chiupper=qchisq((1-conf.level)/2,n-1)
+leftvariance<-variance*(n-1)/chilower
+rightvariance<-variance*(n-1)/chiupper
+leftstd<-sqrt(leftvariance)
+rightstd<-sqrt(rightvariance)
+leftvariance
+rightvariance
+leftstd
+rightstd
+```
+
+## Problem #4
+
+Create a function to construct a confidence interval for $\mu$ with $\sigma$ unknown. (9 points)
+
+```{r}
+CI_sigma<-function(n,xbar,sig,alpha){
+  t_value=qt(1-alpha,n-1)
+  E<- t_value*sig/sqrt(n)
+  left<-xbar-E
+  right<-xbar+E
+  c(left,right)}
+
+```
+
+## Problem #5
+
+Use your function to answer the following question. 
+
+A fitness supplement manufacturer is concerned about the accuracy of the creatine content in their product. They took a random sample of 25 supplement containers and found that, on average, they contained 4.2 grams of creatine with a standard deviation of 0.1 grams.Calculate a 96% confidence interval for the average creatine content in this brand of fitness supplement, which will help assess the accuracy of the product labeling. (2 points)
+
+```{r}
+CI_sigma(25,4.2,0.1,0.04)
+```
+
+## Problem #6
+
+A manufacturing company claims that their production process results in products with an average weight of 150 grams or less. However, a quality control team suspects that recent changes in the manufacturing process have led to an increase in the average weight. To test this claim, they randomly selected a sample of 50 products and found that the average weight was 154 grams, with a known population standard deviation of 5 grams.Using a significance level of $\alpha$ = 0.05, does the quality control team have enough evidence to conclude that the average weight of the products is greater than the claimed value of 150 grams by the company?
+
+a. First solve this problem by comparing the test statistic with the critical value: (6 points)
+```{r}
+xbar=154
+mu0=150
+sigma=5
+n=50
+z=(xbar-mu0)/(sigma/sqrt(n))
+z 
+alpha=0.05
+z_crit=qnorm(0.95)
+z_crit
+```
+
+b. State the decision: (2 points)
+
+*Since the z value of 5.66 is greater than alpha=1.64, we reject H0. There is enough evidence to conclude that the average weight of the products is greater than 150.*
+
+c. Find the p-value. (2 points)
+
+```{r}
+p_val=(1-pnorm(z))
+p_val
+```
+
+d. Now compare the p-value with the significance level to make the decision.  (2 points)
+
+*The p-value of 7.71e-09, is way less than the significance level of 0.04, so we reject H0.*
+
+## Problem #7
+
+A sports equipment company advertises that the average distance their golf balls travel when hit with a driver is 280 yards. To test this claim, a golfer conducts a test and randomly selects 25 of these golf balls. After hitting them with a driver, the average distance they travel is found to be 270 yards, with a standard deviation of 15 yards.Using a significance level of $\alpha$ = 0.01, is there enough evidence to conclude that the average distance these golf balls travel when hit with a driver is significantly different from the claimed 280 yards by the sports equipment company?
+
+a. First solve this problem by comparing the test statistic with the critical value: (6 points)
+```{r}
+xbar=270
+mu0=280
+s=15
+n=25
+t=(xbar-mu0)/(s/sqrt(n))
+t 
+alpha=0.01
+t.half.alpha=qt(alpha/2, df=n-1)
+c(-t.half.alpha, t.half.alpha)
+```
+
+b. State the decision: (2 points)
+
+*The t-value of 03.33 is less than the left side critical value of -2.797, so we reject H0. There is enough evidence to conclude the mean distance significantly differs from the hypothesized 280.*
+
+c. Find the p-value. (2 points)
+
+```{r}
+p_val=2*pt(t, df=n-1)
+p_val
+```
+
+d. Now compare the p-value with the significance level to make the decision.  (2 points)
+
+*Since the p-value fo 0.0028 is less than the significance value of 0.01, we reject H0.*
+
+
+## Problem #8
+
+A smartphone manufacturer specifies that the battery life of their latest model should have a standard deviation of 1 hour or less under normal usage conditions. To assess whether this requirement is met, the manufacturer conducts monthly tests by randomly selecting 20 smartphones and measuring the standard deviation of their battery life in hours. For last month, the sample standard deviation was found to be 1.1 hours.Using a significance level of $\alpha$ = 0.05, does this indicate that the manufacturer's requirement of a standard deviation of 1 hour or less for battery life is not being met for this model?
+
+a. First solve this problem by comparing the test statistic with the critical value: (6 points)
+```{r}
+s_square=1.1
+sigma_square=1
+n=20
+chi_square=(n-1)*s_square/sigma_square
+chi_square 
+alpha=0.05
+chi_crit=qchisq(0.05,n-1,lower.tail = FALSE)
+chi_crit
+```
+
+b. State the decision: (2 points)
+
+*Since the test statistic of 20.9 is less than the critical value of 30.15, so we fail to reject H0. There is not enough evidence to conclude the standard deviation requirement is not being met.*
+
+c. Find the p-value. (2 points)
+
+```{r}
+p_val=pchisq(chi_square,n-1,lower.tail=FALSE)
+p_val
+```
+
+d. Now compare the p-value with the significance level to make the decision.  (2 points)
+
+*Since the p-value of 0.34 is greater than alpha=0.05, we fail to reject H0.*
+
+
+
+## Problem #9
+
+A car rental company is considering two different car models for their fleet. They want to determine if there is a significant difference in the variability of fuel efficiency (miles per gallon) between the two models. They randomly selected 30 cars of Model "A" and 25 cars of Model "B" from their suppliers and calculated the sample standard deviation of fuel efficiency for each model. For Model "A," the sample standard deviation was found to be 4.1 miles per gallon, while for Model "B," it was found to be 2.5 miles per gallon.Using a significance level of $\alpha$ = 0.10, does this data provide enough evidence to conclude that there is a significant difference in the variability of fuel efficiency between the two car models?
+
+a. First solve this problem by comparing the test statistic with the critical value: (6 points)
+```{r}
+s_square_1=4.1^2
+s_square_2=2.5^2
+n1=30
+n2=25
+F=s_square_1/s_square_2
+F 
+alpha=0.05
+f_crit=qf(0.05,29,24,lower.tail = FALSE)
+f_crit #F critical value
+```
+
+b. State the decision: (2 points)
+
+*Since the test statistic of 2.69 is greater than the upper tail critical value of 1.945, we reject H0. There is enough evidence to conclude that there is a significant difference in the variability of fuel efficiency between the two car models*
+
+c. Find the p-value. (2 points)
+
+```{r}
+p_val=pf(F,n1-1,n2-1,lower.tail = FALSE)
+p_val
+```
+
+d. Now compare the p-value with the significance level to make the decision.  (2 points)
+
+*Since the p-value of 0.008 is less than alpha=0.05, we reject H0.*
+
+
+##Problem #10:
+
+A software company's customer support department experiences customer service requests throughout the day, and they believe that the number of requests per hour follows a Poisson distribution. To test this assumption, they recorded the actual number of customer service requests in 200 one-hour periods over the course of a month.Using a significance level of $\alpha$ = 0.05, and based on the following data, they want to assess whether the number of customer service requests per hour indeed follows a Poisson distribution:
+
+
+Number of Requests  | Frequency |
+--------------------|-----------|
+     0              |     7     |
+     1              |     15    |
+     2              |     41    |
+     3              |     51    |
+     4              |     44    |
+     5              |     25    |
+     6              |     10    |
+ 7 or more          |     7     |
+
+a. Solve this problem using `chisq.test()`. (8 points)
+```{r}
+x=rep(0:7, times=c(7,15,41,51,44,25,10,7))
+x
+table(x)
+mean(x)
+probs=dpois(0:6,lambda=mean(x))
+comp=1-sum(probs)
+chisq.test(x=c(7,15,41,51,44,25,10,7),p=c(probs,comp))
+```
+
+b. Compare the p-value with the significant level to make the decision.(2 points)  
+
+*Since the p-value of 0.327 is greater than alpha=0.05, we fail to reject H0.There is not enough evidence to suggest the data follows a poisson distribution,*
+
+
+## Problem #11:
+
+A research firm conducted a survey to investigate whether there is a correlation between the type of mobile operating system (iOS or Android) and the preferred method of mobile payment (credit card or digital wallet) among smartphone users. They collected data from a random sample of 500 smartphone users and recorded their mobile operating system and payment preferences.Using a significance level of $\alpha$ = 0.05, and based on the following data, they want to test the independence of the two variables (mobile operating system and payment preference):
+
+Mobile OS     | iOS     | Android  |   
+--------------|---------|----------|
+Credit card   |   85    |  120     |  
+Digital Wallet|   45    |  250     |  
+
+a. Solve this problem using the `chisq.test(x)` function. (8 points)
+
+
+```{r}
+hIos=c(85,120)
+hAnd=c(120,250)
+OS=cbind(hIos,hAnd)
+rownames(OS)=c("credit card","digital wallet")
+OS
+chisq.test(OS)
+```
+
+b. State the decision: (2 points)
+
+*Since the p-value of 0.03 is less than alpha=0.05, we reject H0. There is enough evidence to suggest the two variables are not independent.
+
+

@@ -1,0 +1,199 @@
+---
+title: "Lab 3"
+author: "Drake Johnson"
+date: "11/2/23"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Example #1: One Way Anova (Completely Randomized Design)
+
+In previous classes we learned that ANOVA can be used to test for three or more population means. We can use the function `aov(dependent variable~independent variable, data structure that is being analyzed)` to conduct this test. 
+
+Consider the following example:
+
+To test whether the mean time needed to mix a batch of the same material is different for machines produced by three manufacturers, the Jacobs Chemical Company obtained the data on the time (in minutes) needed to mix the material. Use the excel file ChemicalCompany.csv to conduct the statistical analysis. 
+
+a. Before carrying any analysis, let's use a box plot to visualize any group differences. 
+```{r}
+data<-read.csv("Chemical Company.csv")
+boxplot(Time~Manufacturer,data = data,main="Chemical Company",xlab = "Manufacturer",ylab="Time",col=heat.colors(3))
+```
+
+b. Conduct analysis of variance test and examine the ANOVA plots to see if the data meets the assumptions of ANOVA
+```{r}
+aov.ex1<-aov(Time~as.factor(Manufacturer),data = data)
+summary(aov.ex1)
+plot(aov.ex1)
+tukey.test<-TukeyHSD(aov.ex1)
+tukey.test
+plot(tukey.test)
+```
+
+Use a 0.05 level of significance to test whether the temperature  level  has  an  effect on the mean yield of the process.
+
+*Since the p-value of 0.00426 is less than alpha=0.05, we reject H0. There is enough evidence to conclude that not all population means are equal.*
+
+* **Normality**
+
+If the residuals follow a normal distribution, we would see a straight line in the Normal Q-Q plot.
+
+    - Shapiro Test: It is widely recommended for normality test.
+
+```{r}
+aov_residuals<-residuals(aov.ex1)
+shapiro.test(aov_residuals)
+```
+* **Homogeneity of variance (Equality of the variances)**
+
+Bartlett test: If the data is normally distributed, this is the best test to use.
+
+```{r}
+bartlett.test(Time~Manufacturer, data = data)
+```
+
+
+## Example #2: Randomized Block Design
+
+An automobile dealer conducted a test to determine if the type of analyzer has a significant effect on the time in minutes needed to complete a minor engine tune-up. Because tune-up time varies among compact, intermediate, and full-sized cars, the three types of cars were used as blocks  in the experiment. Use the excel file Analyzer.csv to conduct the statistical analysis.
+
+a. Before carrying any analysis, let's use a box plot to visualize any group differences. 
+```{r}
+data2<-read.csv("Analyzer.csv")
+boxplot(Time~Analyzer,data = data2,main="Analyzer",xlab="Type of Analyzer",ylab="Time",col=topo.colors(3))
+```
+b. Conduct analysis of variance test and examine the ANOVA plots to see if the data meets the assumptions of ANOVA
+
+```{r}
+Analyzer=factor(data2$Analyzer)
+Block=factor(data2$Block)
+Time2=data2$Time
+aov.ex2<-aov(Time2~Analyzer+Block)
+summary(aov.ex2)
+plot(aov.ex2)
+```
+Using $alpha$= 0.05, what is your conclusion?
+
+Since the p-value of 0.04 is less than alpha=0.05, we reject H0. There is enough evidence to conclude that not all population means are equal.
+
+* **No interaction (Assumption of 
+additivity)**
+
+We can test this assumption with the Tukey's test for additivity. We address the following hypotheses: 
+
+H0: Main effects and blocks are additive, versus 
+HA: Main effects and blocks are non-additive.
+
+```{r}
+tukey.add.test<-TukeyHSD(aov.ex2)
+tukey.add.test
+```
+
+We fail to reject H0 (model effects are additive); therefore, we are justified in using the MSE (which contains the Block*Treatment interaction) as a reliable estimate of the true experimental error.
+
+  * **Interaction Plot**
+
+```{r}
+interaction.plot(Analyzer,Block,Time2)
+```
+
+* **Normality**
+
+If the residuals follow a normal distribution, we would see a straight line in the Normal Q-Q plot.
+
+    - Shapiro Test: It is widely recommended for normality test.
+
+```{r}
+aov_residuals2<-residuals(aov.ex2)
+shapiro.test(aov_residuals2)
+```
+
+* **Homogeneity of variance (Equality of the variances)**
+
+Bartlett test: If the data is normally distributed, this is the best test to use.
+
+```{r}
+bartlett.test(Time2~Analyzer)
+```
+
+## Example #3: Factorial Design
+
+A mail-order catalog firm designed a factorial experiment to test the effect of the size of a magazine advertisement (Factor A) and the advertisement design on the number of catalog requests received, data in thousands (Factor B) . The data obtained follow. Use the ANOVA procedure for factorial designs to test for any significant effects due to type of design, size of advertisement, or interaction t 5% level of significance. Use the excel file MailOrder.csv to conduct the statistical analysis.
+
+a. Before carrying any analysis, let's use a box plot to visualize any group differences. 
+
+```{r}
+data3<-read.csv("MailOrder.csv")
+boxplot(Requests~Design,data=data3, main="Mail-Order Catalog",xlab="Type of Design",ylab="Requests",col=topo.colors(3))
+boxplot(Requests~Size,data=data3,main="Mail-Order Catalog",xlab="Size",ylab="Requests",col=heat.colors(3))
+```
+b. Conduct analysis of variance test and examine the ANOVA plots to see if the data meets the assumptions of ANOVA
+
+assumptions of ANOVA
+```{r}
+aov.ex3<-aov(Requests~Size*Design,data=data3)
+summary(aov.ex3)
+plot(aov.ex3)
+```
+
+  * **Interaction Plot**
+
+```{r}
+interaction.plot(data3$Size,data3$Design,data3$Requests)
+```
+
+* **Normality**
+
+If the residuals follow a normal distribution, we would see a straight line in the Normal Q-Q plot.
+
+    - Shapiro Test: It is widely recommended for normality test.
+
+```{r}
+aov_residuals3<-residuals(aov.ex3)
+shapiro.test(aov_residuals3)
+```
+
+* **Homogeneity of variance (Equality of the variances)**
+
+Bartlett test: If the data is normally distributed, this is the best test to use.
+
+**Factor:Size**
+
+```{r}
+bartlett.test(data3$Requests~data3$Size)
+```
+
+**Factor:Design**
+
+```{r}
+bartlett.test(data3$Requests~data3$Design)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```

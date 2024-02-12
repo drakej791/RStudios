@@ -1,0 +1,367 @@
+---
+title: "Lab 2"
+author: Drake Johnson
+date: "9/28/2023"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+
+## Example #1: Standard Normal Distribution
+
+In previous classes we learned that if we can compute the standard normal value (z) then we can find the probability P(Z<z). 
+
+We can use the funtion `pnorm(q)` to find the probability P(z<z), where p stands for z value. The probability to the left hand side of z = 2 is 
+
+```{r}
+pnorm(2)
+```
+
+
+## Example #2: Inverse Normal Distribution
+
+It is also the case that if we know the probability P(Z<z) then we can find the z value and then with the mean and standard deviation we can determine the x value (Inverse Normal probability distribution).
+
+We can use the function `qnorm(p)` to find the z value, where p stands for the lower tail probability. The z value for an area in the left side of the tail of 0.05 is
+
+```{r}
+qnorm(0.05)
+```
+
+
+## Example #3: Using Normal Probability Distribution to construct confidence intervals about the population mean (Population Standard Deviation is known)
+
+Discount Sounds has 260 retail outlets throughout the United States.  The firm is evaluating a potential location for a new outlet, based in part, on the mean annual income of the individuals in the marketing area of the new location. A sample of size n = 36 was taken; the sample mean income is 41,100. The population is not believed to be highly skewed. The population standard deviation is estimated to be $4,500. Construct a 95% confidence interval about the population mean of the annual income. 
+
+
+```{r}
+n<-36
+xbar=41100
+sig=4500
+z_value=abs(qnorm(0.025))
+moE<-z_value*sig/sqrt(n)
+left<-xbar-moE
+right<-xbar+moE
+left #Lower Limit
+right #Upper Limit
+```
+
+## Example #4: t-student's distribution
+
+In previous classes we learned that if the population standard deviation is unknown the t-student's distribution is used to construct the confidence interval for the population mean. We can use the function `qt(p, df)` to find the t values in the distribution. p stands for the lower tail probability and df for the degrees of freedom. The t value  with a lower tail probability of 0.05 and sample size of 11 is 
+
+```{r}
+qt(0.05,10)
+```
+
+## Example #5: Using t value to compute t-student's distribution probalities
+We can use the function `pt(q, df)` to find the lower tail probability for a given t value. q stands for the t value and df for the degrees of freedom. The lower tail probability for a t value of 1.69  with a sample size of 36 is
+
+```{r}
+pt(1.69,35)
+```
+If you want to determine the upper tail probability include lower.tail = FALSE. For example:
+
+```{r}
+pt(1.69,35,lower.tail = FALSE)
+```
+
+
+## Example #6: Using t-student's Distribution to construct confidence intervals about the population mean (Population Standard Deviation is unknown)
+
+A reporter for a student newspaper is writing an article on the cost of off-campus housing.  A sample of 16 efficiency apartments within a half-mile of campus resulted in a sample mean of $750 per month and a sample standard deviation of 82. Let us provide a 95% confidence interval estimate of the mean rent per month for the population of efficiency apartments within a half-mile of campus. We will assume this population to be normally
+distributed.
+
+```{r}
+n<-16
+xbar=750
+sig=82
+t_value=qt(0.975,n-1)
+moE<-t_value*sig/sqrt(n)
+left<-xbar-moE #Lower Limit
+right<-xbar+moE #Upper Limit
+left
+right
+```
+
+## Example 7: Chi-square distribution 
+We can use the chi-square distribution to develop estimates and conduct hypothesis tests about the population variance. We can use the function `qchisq(p, df)` to find the chi-square values in the distribution. p stands for the lower tail probability and df for the degrees of freedom. The chi-square value for a lower tail probability of 0.05 and degrees of freedom of 17 is 
+
+```{r}
+qchisq(0.95,17)
+```
+
+If you want to determine the chi-square value with the upper tail probability include lower.tail = FALSE. For example:
+
+
+```{r}
+qchisq(0.95,17,lower.tail = FALSE)
+```
+
+
+## Example 8: Confidence Interval for the population variance
+
+The variance in drug weights is critical in the pharmaceutical industry. For a specific drug, with weights measured in grams, a sample of 18 units provided a sample variance of 0.36.
+
++ Construct a 90% confidence interval estimate of the population variance for the weight of this drug.
+
++ Construct a 90% confidence interval estimate of the population standard deviation.
+
+
+```{r}
+n<-18
+variance<-0.36
+conf.level=0.9
+chilower=qchisq((1-conf.level)/2,n-1,lower.tail = FALSE)
+chiupper=qchisq((1-conf.level)/2,n-1)
+leftvariance<-variance*(n-1)/chilower
+rightvariance<-variance*(n-1)/chiupper
+leftstd<-sqrt(leftvariance)
+rightstd<-sqrt(rightvariance)
+leftvariance
+rightvariance
+leftstd
+rightstd
+
+```
+
+## Example 9: Functions in R
+
+Let's not write that much code each time.  Let's create a function that takes as input $\bar{x}$, $n$, $\sigma$, and $\alpha$ then returns the values left and right.
+
+R can make functions like so:
+```{r eval=FALSE}
+myfunction<-function(arg1,arg2,...) #function name with input parameters
+  statements #commands executing the function
+return(object) #return the result
+
+```
+
+For a confidence interval for $\mu$ with $\sigma$ known:
+```{r}
+ CI_sigma<-function(n,xbar,sig,alpha){
+  z_value=abs(qnorm(alpha/2))
+  E<- z_value*sig/sqrt(n)
+  left<-xbar-E
+  right<-xbar+E
+  c(left,right)
+  }
+```
+
+## Example 10: Using a function for confidence interval about the population mean. Example #3 revisited
+Let's see if it our function works on Example #3:
+```{r}
+CI_sigma(36,41100,4500,0.05)
+
+```
+
+## Example 11: Hypothesis test: right-tailed test (variance known)
+
+Suppose the University of Memphis advertises that its average class size is 40 students or less. A student organization is concerned that budget cuts have led to increased class sizes and would like to test this claim. A random sample of 38 classes was selected, and the average class size was found to be 43.5 students. Assume that the population standard deviation for class size at the college is 6 students. Using $\alpha$ = 0.05, does the student organization have enough evidence to conclude that the average size is greater than that stated by the college? 
+
+a. First we solve this problem by comparing the test statistic with the critical value:
+```{r}
+#This is a right tail test
+xbar=43.5
+mu0=40
+sigma=6
+n=40
+z=(xbar-mu0)/(sigma/sqrt(n))
+z #test statistic
+#find the critical value
+alpha=0.05
+z_crit=qnorm(0.95)
+z_crit
+```
+
+b. State the conclusion:
+*Since the test statistic (3.689) is more extreme than the critical value (1.645), we reject the null hypothesis. There is enough evidence to conclude that the average size is greater than that stated by the college at 0.05 significance level.*
+
+c. Find the p-value, use the `pnorm()` function.
+
+```{r}
+p_val=(1-pnorm(z)) #right side p value
+p_val
+```
+
+d. Now compare the p-value with the significance level to make the decision.  
+*Since the p-value  (0.0001124254) is less than the significance level (0.05), we reject the null hypothesis. There is enough evidence to conclude that the average size is greater than that stated by the college at 0.05 significance level.*
+
+
+## Example 12: Hypothesis test: two-tailed test (variance unknown)
+
+Suppose that the online travel agency Travelocity reported in 2010 that summer travelers booked their airline reservations an average of 73 days in advance. A random sample of 41 summer travelers in 2017 was selected, and the number of days travelers booked their airline reservations in advance was recorded. The average was 75 with a sample standard deviation of 15 days. Using $\alpha$??? = 0.05, determine if the average number of days reservations are booked in advance has changed since 2010. 
+
+a. First solve this problem by comparing the test statistic with the critical value:
+```{r}
+#Find the test statistic
+xbar=75
+mu0=73
+s=15
+n=41
+t=(xbar-mu0)/(s/sqrt(n))
+t #test statistic
+#find the critical values
+alpha=0.05
+t.half.alpha=qt(alpha/2, df=n-1)
+c(-t.half.alpha, t.half.alpha)
+```
+
+b. State the decision:
+
+*Since the test statistic (0.8537) is not as extreme as the critical values (-2.021, 2.021), we do not reject the null hypothesis. There is not enough evidence to conclude that the average number of days reservations are booked in advance has changed since 2010 at 0.05 significance level.*
+
+c. Find the p-value, use the `pt()` function.
+
+```{r}
+p_val=2*pt(t, df=n-1)
+p_val
+```
+
+## Example 13: Hypothesis test for one population variance
+
+An automotive part must be machined to close tolerances to be acceptable to customers. Production specifications call for a maximum variance in the lengths of the parts of 0.0004. Suppose the sample variance for 30 parts turns out to be 0.0005. Use $\alpha$ = 0.05 to test whether the population variance specification is being violated.
+
+a. First solve this problem by comparing the test statistic with the critical value:
+
+```{r}
+#Find the test statistic
+s_square=0.0005
+sigma_square=0.0004
+n=30
+chi_square=(n-1)*s_square/sigma_square
+chi_square #test statistic
+#Find the critical value
+alpha=0.05
+chi_crit=qchisq(0.05,n-1,lower.tail = FALSE)
+chi_crit
+```
+
+b. State the decision:
+
+*Since the test statistic (36.25) is not as extreme as the critical value (42.55697), we do not reject the null hypothesis. There is not enough evidence to conclude that the variance specification is being violates at 0.05 significance level.*
+
+c. Find the p-value, use the `pchisq` function.
+
+```{r}
+p_val=pchisq(chi_square,n-1,lower.tail=FALSE)
+p_val
+```
+
+d. Now compare the p-value with the significance level to make the decision.  
+
+*Since the p-value (0.166) is greater than the significance level (0.05), we fail to reject the null hypothesis. There is not enough evidence to conclude that the variance specification is being violates at 0.05 significance level.*
+
+
+
+## Example 14: Hypothesis test for two population variances
+
+Investors commonly use the standard deviation of the monthly percentage return for a mutual fund as a measure of the risk for the fund; in such cases, a fund that has a larger standard deviation is considered more risky than a fund with a lower standard deviation. The standard  deviation for the American Century Equity Growth fund and the standard deviation for the Fidelity Growth Discovery fund were recently reported to be 15.0% and 18.9%, respectively. Assume that each of these standard deviations is based on a sample of 61 months of returns. Do the sample results support the conclusion that the Fidelity fund has a larger population variance  than the  American Century fund at 0.05 significance level? 
+
+a. First solve this problem by comparing the test statistic with the critical value:
+
+```{r}
+#Find the Test Statistic
+s_square_1=18.9^2
+s_square_2=225
+n1=61
+n2=61
+F=s_square_1/s_square_2
+F #test statistic
+#Find the critical value
+alpha=0.05
+f_crit=qf(0.05,60,60,lower.tail=FALSE)
+f_crit #F critical value
+```
+b. State the decision:
+
+*Since the test statistic (1.5876) is ore extreme than the critical value (1.534), we reject the null hypothesis. There is enough evidence to conclude that Fidelity Fund has a larger population variance than the American centure fund at 0.05 significance level.*
+
+c. Find the p-value, use the `pchisq` function.
+
+```{r}
+p_val=pf(F,n1-1,n2-1,lower.tail = FALSE)
+p_val
+```
+
+d. Now compare the p-value with the significance level to make the decision.  
+
+*Since the p-value (0.03795) is less than the significance level (0.05), we reject the null hypothesis. There is enough evidence to conclude that Fidelity Fund has a larger population variance than the American centure fund at 0.05 significance level.*
+
+
+
+## Example 14B: Hypothesis test for two population variances using the function var.test
+```{r}
+x<-rnorm(50,mean=0,sd=2)
+y<-rnorm(50,mean=1,sd=1)
+var.test(x,y,alternative="greater")
+```
+
+## Example 15: Testing for Goodness of Fit (Poisson Distribution)
+
+In previous classes we learned that we can conduct a goodness of fit test based on the chi-square distribution. We can use the `chisq.test(x = observed, p= expected probabilities)` function, where "observed"" stands for the observed frequencies and "expected probabilities" for the probabilities of each value of the random variable using the expected mean. Let's illustrate how to use the `chisq.test()` funtion with the following example:
+
+A civil engineer has been studying the frequency of vehicle accidents on a certain stretch of interstate highway. The number of accidents per day is believed to have a Poisson distribution. Suppose that the actual number of accidents per day was observed in 90 days. Use $\alpha$ = 0.01 and the following data to test the assumption that the number of arrivals follow a Poisson distribution.
+
+Accidents | Frequency |
+----------|-----------|
+     0    |     22    |
+     1    |     21    |
+     2    |     15    |
+     3    |     17    |
+4 or more |     15    |
+
+a. First solve this problem using `chisq.test()` function
+
+```{r}
+#Create a dataset x.
+#We are creating 22 observations "0", 21 observations "1" and so on. 
+#The command rep is used with the argument times to do that. 
+#We use this dataset to compute the weighted mean.
+
+x=rep(0:4, times=c(22,21,15,17,15))
+x
+table(x)
+mean(x)
+probs=dpois(0:3,lambda=mean(x))
+comp=1-sum(probs)
+#chi-squared test
+chisq.test(x=c(22,21,15,17,15),p=c(probs,comp))
+
+```
+
+
+b. Now let's compare the p-value with the significance level to make the decision.  
+*Since the p-value (0.02318) is greater than the significance level (0.01), we fail to reject the null hypothesis. There is lack of evidence to conclude that the population does no follow a Poisson distribution.*
+
+
+
+## Example #16: Testing for Independence 
+
+In class we learned that the chi-square distribution is used for testing independence. The `chisq.test(x)` funtion performs chi-squared contigency table tests. "x" stands for contigency table with the frequencies for the two variables. Let's illustrate how to use the `chisq.test()` funtion with the following example:
+
+Innovative Machines Incorporated has developed two new letter arrangements for computer keyboards. The company wishes to see if there is any relationship between the arrangement of letters on the keyboard and the number of hours it takes a new typing student to learn to type at 20 words per minute. Use $\alpha$= 0.05 and test for the independence of the two variables.
+
+Keyboard| 21-40 h | 41-60 h|61-80 h |
+--------|---------|--------|--------|
+     A  |     25  |  30    |  25    |
+     B  |     30  |  71    |  19    |
+Standard|     35  |  49    |  16    |
+     
+a. First solve this problem using the `chisq.test(x)` funtion
+
+```{r}
+h21_40=c(25,30,35)
+h41_60=c(30,71,49)
+h61_80=c(25,19,16)
+hours=cbind(h21_40,h41_60,h61_80)
+rownames(hours)=c("A","B","Standard")
+hours
+chisq.test(hours)
+```
+b. Now let's compare the p-value with the significance level to make the decision.  
+
+*Since the p-value (0.009831) is less than the significance level (0.05), we reject the null hypothesis. There is enough evidence to conclude that the number of hours it takes a new typing stdent to learn to type at 20 words per minute is not independent of the type of keyboard. In other words, there is a relationship between the variables.*
+
